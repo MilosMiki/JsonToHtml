@@ -7,14 +7,14 @@ namespace FlawlessCode.Services
 {
     public class JsonParser
     {
-        // initially the json data goes to this function (creates the head node)
+        // initially the json data goes to this function
         public Models.JsonNode ParseJson(string json)
         {
             var jsonObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
             return ParseDictionary(jsonObject!);
         }
 
-        // creates child nodes
+        // creates nodes
         private Models.JsonNode ParseDictionary(Dictionary<string, object> dict)
         {
             var node = new Models.JsonNode();
@@ -24,12 +24,14 @@ namespace FlawlessCode.Services
             }
             foreach (var kvp in dict)
             {
-                Models.JsonValue res = ParseValue(kvp.Value);
+                Models.JsonValue? res = ParseValue(kvp.Value);
+                if (res == null) continue;
+
                 if (res.IsArray && res.ArrayValue != null)
                 {
-                    foreach (Models.JsonNode item in res.ArrayValue)
+                    foreach (Models.JsonNode kvpChild in res.ArrayValue)
                     {
-                        node.Properties.Add(new KeyValuePair<string, Models.JsonValue>(kvp.Key, Models.JsonValue.JsonNodeToValue(item))); 
+                        node.Properties.Add(new KeyValuePair<string, Models.JsonValue>(kvp.Key, Models.JsonValue.JsonNodeToValue(kvpChild))); 
                     }
                 }
                 node.Properties.Add(new KeyValuePair<string, Models.JsonValue>(kvp.Key, res));
@@ -38,9 +40,9 @@ namespace FlawlessCode.Services
         }
 
         // parses the value type of the node (string, list, array)
-        private Models.JsonValue ParseValue(object value)
+        private Models.JsonValue? ParseValue(object value)
         {
-            if (value == null) return new Models.JsonValue();
+            if (value == null) return null;
 
             switch (value)
             {
