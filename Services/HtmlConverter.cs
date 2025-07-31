@@ -138,7 +138,7 @@ namespace FlawlessCode.Services
             if (string.IsNullOrEmpty(element)) return content;
 
             // Build attributes string
-            string attributes = parameters != null
+            string attributes = (parameters != null && parameters.Any())
                 ? " " + string.Join(" ", parameters
                     .Select(p => p.Value.IsString
                         ? $"{p.Key}=\"{p.Value.StringValue}\""
